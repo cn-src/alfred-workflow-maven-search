@@ -32,6 +32,8 @@ def fix_q(q):
             return q + '"'
     else:
         q1 = search_m(q)
+        if q1 is None:
+            return ""
         q2 = search_g_and_a(q1)
         return q2
 
@@ -59,6 +61,19 @@ def search_m(q):
     q_map = {
         'poi': 'g:"org.apache.poi"',
         'jodd': 'g:"org.jodd"',
+        'h2': 'g:"com.h2database"',
+        'querydsl': 'g:"com.querydsl"',
+        'netty': 'g:"io.netty"',
+        'commons': 'g:"org.apache.commons"',
+        'lang': 'g:"org.apache.commons"+AND+a:"commons-lang3"',
+        'guava': 'g:"com.google.guava"+AND+a:"guava"',
+        'http': 'g:"org.apache.httpcomponents"',
+        'groovy': 'g:"org.codehaus.groovy"',
+        'jooq': 'g:"org.jooq"',
+        'lombok': 'g:"org.projectlombok"',
+        'slf4j': 'g:"org.slf4j"',
+        'spring': 'g:"org.springframework"',
+        'springboot': 'g:"org.springframework.boot"',
     }
     q = q[2:]
     if q in q_map:
@@ -68,8 +83,9 @@ def search_m(q):
 def search_any():
     url = 'http://search.maven.org/solrsearch/select'
     q = fix_q(wf.args[0].strip())
-
-    # 不能使用 web.get 的参数形式 Maven 官方 API 仅仅只是对双引号做了 url 编码
+    if q is None or len(q) <= 0:
+        return []
+        # 不能使用 web.get 的参数形式 Maven 官方 API 仅仅只是对双引号做了 url 编码
     params = '?q=%s&rows=20&wt=json' % q.replace('"', '%22')
     if q.find('"+AND+a:"') > -1:
         params = params + '&core=gav'
@@ -86,6 +102,8 @@ def search_any():
 
 def main(wf):
     items = wf.cached_data(wf.args[0].strip(), search_any, max_age=60 * 3)
+    if items is None or len(items) == 0:
+        items = search_any()
     for it in items:
         if 'latestVersion' in it:
             v = it['latestVersion']
