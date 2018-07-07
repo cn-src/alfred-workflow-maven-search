@@ -69,10 +69,12 @@ def search_any():
     url = 'http://search.maven.org/solrsearch/select'
     q = fix_q(wf.args[0].strip())
 
-    params = {'q': q, 'rows': 20, 'wt': 'json'}
+    # 不能使用 web.get 的参数形式 Maven 官方 API 仅仅只是对双引号做了 url 编码
+    params = '?q=%s&rows=20&wt=json' % q.replace('"', '%22')
     if q.find('"+AND+a:"') > -1:
-        params['core'] = 'gav'
-    r = web.get(url, params)
+        params = params + '&core=gav'
+
+    r = web.get(url + params)
 
     r.raise_for_status()
 
@@ -85,14 +87,18 @@ def search_any():
 def main(wf):
     items = wf.cached_data(wf.args[0].strip(), search_any, max_age=60 * 3)
     for it in items:
-        des = it['id'] + ':' + it['latestVersion'] + ':' + it['p']
+        if 'latestVersion' in it:
+            v = it['latestVersion']
+        else:
+            v = it['v']
+        des = it['id'] + ':' + v + ':' + it['p']
         pom_xml = '''
         <dependency>
             <groupId>%s</groupId>
             <artifactId>%s</artifactId>
             <version>%s</version>
         </dependency>
-        ''' % (it['g'], it['a'], it['latestVersion'])
+        ''' % (it['g'], it['a'], v)
         icns = ICON_WEB
         if 'jar' == it['p']:
             icns = 'icns/java.icns'
@@ -104,8 +110,12 @@ def main(wf):
         if ecs.endswith(', '):
             ecs = ecs[:-2]
         update_time = time.strftime("%Y-%m-%d", time.localtime(long(it['timestamp']) / 1000))
+        if 'versionCount' in it:
+            subtitle = 'all:%s updated:%s ec:%s' % (it['versionCount'], update_time, ecs)
+        else:
+            subtitle = 'updated:%s ec:%s' % (update_time, ecs)
         wf.add_item(title=des,
-                    subtitle='all:%s updated:%s ec:%s' % (it['versionCount'], update_time, ecs),
+                    subtitle=subtitle,
                     arg=pom_xml,
                     valid=True,
                     icon=icns)
