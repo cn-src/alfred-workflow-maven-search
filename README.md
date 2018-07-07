@@ -21,3 +21,6 @@ Maven 中央仓库搜索的 Alfred Workflow 插件
 
 * 对 groupId 进行缩短，缓解显示长度问题（不能完全避免）
 ![](site/demo-len.png)
+
+* 红色咖啡杯标示有 jar，绿色标示无 jar
+![](site/demo-status.png)
