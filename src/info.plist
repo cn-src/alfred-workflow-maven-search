@@ -4,8 +4,6 @@
 <dict>
 	<key>bundleid</key>
 	<string>cn.javaer.alfred.maven.central.repository.search</string>
-	<key>category</key>
-	<string>Tools</string>
 	<key>connections</key>
 	<dict>
 		<key>FE0D4719-E659-47AB-9840-EF122D0EA24D</key>
@@ -64,7 +62,7 @@
 				<key>scriptfile</key>
 				<string></string>
 				<key>subtext</key>
-				<string>Maven 中央仓库模糊搜索</string>
+				<string>Maven 中央仓库搜索</string>
 				<key>title</key>
 				<string>Maven 搜索</string>
 				<key>type</key>
