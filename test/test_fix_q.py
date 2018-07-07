@@ -10,5 +10,6 @@ class TestFix_q(TestCase):
         self.assertEquals(fix_q('a:"demo"'), 'a:"demo"')
         self.assertEquals(fix_q('g:demo'), 'g:"demo"')
         self.assertEquals(fix_q('g:"demo"'), 'g:"demo"')
+        self.assertEquals(fix_q('m:poi'), 'g:"org.apache.poi"')
         #  不正确的写法，保持原样
         self.assertEquals(fix_q('a:"demo'), 'a:"demo')

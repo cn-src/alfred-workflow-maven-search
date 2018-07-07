@@ -16,14 +16,25 @@ from workflow import Workflow3, ICON_WEB, web
 
 
 def fix_q(q):
-    if ((not q.startswith('a:"')) and q.startswith('a:')) or (not q.startswith('g:"')) and q.startswith('g:'):
+    if ((not q.startswith('a:"')) and q.startswith('a:')) \
+            or (not q.startswith('g:"')) and q.startswith('g:'):
         q = q[:2] + '"' + q[2:]
         if ' ' in q:
             return q.replace(' ', '" ', 1)
         else:
             return q + '"'
     else:
+        return search_m(q)
+
+
+def search_m(q):
+    if not q.startswith('m:'):
         return q
+    q = q[2:]
+    if 'poi' == q:
+        return 'g:"org.apache.poi"'
+    if 'jodd' == q:
+        return 'g:"org.jodd"'
 
 
 def search_any():
