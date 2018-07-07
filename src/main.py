@@ -75,7 +75,7 @@ def main(wf):
             ecs = ecs + ec[1:] + ', '
         if ecs.endswith(', '):
             ecs = ecs[:-2]
-        update_time = time.strftime("%Y--%m--%d", time.localtime(long(it['timestamp'])))
+        update_time = time.strftime("%Y-%m-%d", time.localtime(long(it['timestamp']) / 1000))
         wf.add_item(title=des,
                     subtitle='all:%s updated:%s ec:%s' % (it['versionCount'], update_time, ecs),
                     arg=pom_xml,
