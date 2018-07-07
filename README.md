@@ -1,6 +1,7 @@
 # alfred-workflow-maven-search
 Maven 中央仓库搜索的 Alfred Workflow 插件
 ------
+* 使用前提：Mac OS 10.9+, Python 2.7, Alfred 3
 * 选择后会复制 pom.xml 格式的依赖到剪贴板
 * 搜索20条数据，按更新时间倒序排列
 
