@@ -18,6 +18,11 @@ from workflow import Workflow3, ICON_WEB, web
 
 
 def fix_q(q):
+    """
+    填充分号
+    :param q: 查询表达式
+    :return: 查询表达式
+    """
     if ((not q.startswith('a:"')) and q.startswith('a:')) \
             or (not q.startswith('g:"')) and q.startswith('g:'):
         q = q[:2] + '"' + q[2:]
@@ -26,10 +31,29 @@ def fix_q(q):
         else:
             return q + '"'
     else:
-        return search_m(q)
+        q1 = search_m(q)
+        q2 = search_g_and_a(q1)
+        return q2
+
+
+def search_g_and_a(q):
+    """
+    groupId 和 artifactId 同时作为查询条件
+    :param q: 查询表达式
+    :return: 查询表达式
+    """
+    if q.startswith('g:') or q.startswith('a:') or q.startswith('m:') or (q.find(':') < 0):
+        return q
+    g_and_a = q.split(':', 1)
+    return 'g:"%s"+AND+a:"%s"' % (g_and_a[0], g_and_a[1])
 
 
 def search_m(q):
+    """
+    自定义的常用简短查询
+    :param q: 查询表达式
+    :return: 查询表达式
+    """
     if not q.startswith('m:'):
         return q
     q_map = {
@@ -46,6 +70,8 @@ def search_any():
     q = fix_q(wf.args[0].strip())
 
     params = {'q': q, 'rows': 20, 'wt': 'json'}
+    if q.find('"+AND+a:"') > -1:
+        params['core'] = 'gav'
     r = web.get(url, params)
 
     r.raise_for_status()
