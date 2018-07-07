@@ -1,4 +1,4 @@
-import glob
+#!/usr/bin/env python
 import os
 import zipfile
 
