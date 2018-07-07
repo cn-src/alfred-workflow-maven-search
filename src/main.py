@@ -30,7 +30,7 @@ def search_any():
     url = 'http://search.maven.org/solrsearch/select'
     q = fix_q(wf.args[0].strip())
 
-    params = {'q': q, 'rows': 10, 'wt': 'json'}
+    params = {'q': q, 'rows': 20, 'wt': 'json'}
     r = web.get(url, params)
 
     r.raise_for_status()
