@@ -32,11 +32,13 @@ def fix_q(q):
 def search_m(q):
     if not q.startswith('m:'):
         return q
+    q_map = {
+        'poi': 'g:"org.apache.poi"',
+        'jodd': 'g:"org.jodd"',
+    }
     q = q[2:]
-    if 'poi' == q:
-        return 'g:"org.apache.poi"'
-    if 'jodd' == q:
-        return 'g:"org.jodd"'
+    if q in q_map:
+        return q_map[q]
 
 
 def search_any():
