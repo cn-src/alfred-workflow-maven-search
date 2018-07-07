@@ -12,6 +12,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
+import time, datetime
+
 from workflow import Workflow3, ICON_WEB, web
 
 
@@ -68,8 +70,14 @@ def main(wf):
             icns = 'icns/java.icns'
         elif 'pom' == it['p']:
             icns = 'icns/xml.icns'
+        ecs = ''
+        for ec in it['ec']:
+            ecs = ecs + ec[1:] + ', '
+        if ecs.endswith(', '):
+            ecs = ecs[:-2]
+        update_time = time.strftime("%Y--%m--%d", time.localtime(long(it['timestamp'])))
         wf.add_item(title=des,
-                    subtitle='maven',
+                    subtitle='all:%s updated:%s ec:%s' % (it['versionCount'], update_time, ecs),
                     arg=pom_xml,
                     valid=True,
                     icon=icns)
