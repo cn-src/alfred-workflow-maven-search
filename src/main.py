@@ -44,7 +44,14 @@ def search_g_and_a(q):
     :param q: 查询表达式
     :return: 查询表达式
     """
-    if q.startswith('g:') or q.startswith('a:') or q.startswith('m:') or (q.find(':') < 0):
+    if q.startswith('g:') \
+            or q.startswith('a:') \
+            or q.startswith('m:') \
+            or q.startswith('tags:') \
+            or q.startswith('c:') \
+            or q.startswith('fc:') \
+            or q.startswith('1:') \
+            or (q.find(':') < 0):
         return q
     g_and_a = q.split(':', 1)
     return 'g:"%s"+AND+a:"%s"' % (g_and_a[0], g_and_a[1])
