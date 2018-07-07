@@ -38,6 +38,21 @@ def fix_q(q):
         return q2
 
 
+def fix_length(des):
+    if len(des) <= 50 or des.find(':') < 0:
+        return des
+    s1 = des.split(':', 1)
+    if s1[0].find('.') < 0:
+        return des
+    s1s = s1[0].split('.')
+    r_s = ""
+    for s in s1s:
+        r_s = r_s + s[:1] + '.'
+    if r_s.endswith('.'):
+        r_s = r_s[:-1]
+    return r_s + ':' + s1[1]
+
+
 def search_g_and_a(q):
     """
     groupId 和 artifactId 同时作为查询条件
@@ -111,12 +126,13 @@ def main(wf):
     items = wf.cached_data(wf.args[0].strip(), search_any, max_age=60 * 3)
     if items is None or len(items) == 0:
         items = search_any()
+    has_des = []
     for it in items:
         if 'latestVersion' in it:
             v = it['latestVersion']
         else:
             v = it['v']
-        des = it['id'] + ':' + v + ':' + it['p']
+        des = it['g'] + ':' + it['a'] + ':' + v
         pom_xml = '''
         <dependency>
             <groupId>%s</groupId>
@@ -124,10 +140,9 @@ def main(wf):
             <version>%s</version>
         </dependency>
         ''' % (it['g'], it['a'], v)
-        icns = ICON_WEB
-        if 'jar' == it['p']:
+        if '.jar' in it['ec']:
             icns = 'icns/java.icns'
-        elif 'pom' == it['p']:
+        else:
             icns = 'icns/xml.icns'
         ecs = ''
         for ec in it['ec']:
@@ -139,11 +154,13 @@ def main(wf):
             subtitle = 'all:%s updated:%s ec:%s' % (it['versionCount'], update_time, ecs)
         else:
             subtitle = 'updated:%s ec:%s' % (update_time, ecs)
-        wf.add_item(title=des,
-                    subtitle=subtitle,
-                    arg=pom_xml,
-                    valid=True,
-                    icon=icns)
+        if des not in has_des:
+            has_des.append(des)
+            wf.add_item(title=fix_length(des),
+                        subtitle=subtitle,
+                        arg=pom_xml,
+                        valid=True,
+                        icon=icns)
 
     wf.send_feedback()
 
