@@ -13,6 +13,7 @@
 #
 import sys
 import time
+import hashlib
 
 from workflow import Workflow3, web
 
@@ -158,7 +159,11 @@ def search_any():
 
 
 def main(wf):
-    items = wf.cached_data(wf.args[0].strip(), search_any, max_age=60 * 3)
+    md5 = hashlib.md5()
+    md5.update(wf.args[0].strip().encode("utf-8"))
+    token = md5.hexdigest()
+
+    items = wf.cached_data(token, search_any, max_age=60 * 3)
     if items is None or len(items) == 0:
         items = search_any()
     has_des = []
