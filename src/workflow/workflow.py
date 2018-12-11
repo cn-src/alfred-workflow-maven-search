@@ -44,7 +44,7 @@ except ImportError:  # pragma: no cover
     import xml.etree.ElementTree as ET
 
 from util import (
-    AcquisitionError,  # imported to maintain API
+    # imported to maintain API
     atomic_writer,
     LockFile,
     uninterruptible,
