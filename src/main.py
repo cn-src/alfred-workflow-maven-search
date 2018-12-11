@@ -12,30 +12,38 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
-import time, datetime
+import time
 
-from workflow import Workflow3, ICON_WEB, web
+from workflow import Workflow3, web
 
 
-def fix_q(q):
+def fix_query(query):
     """
     填充分号
-    :param q: 查询表达式
+    :param query: 查询表达式
     :return: 查询表达式
     """
-    if ((not q.startswith('a:"')) and q.startswith('a:')) \
-            or (not q.startswith('g:"')) and q.startswith('g:'):
-        q = q[:2] + '"' + q[2:]
-        if ' ' in q:
-            return q.replace(' ', '" ', 1)
+    if ((not query.startswith('a:"')) and query.startswith('a:')) \
+            or (not query.startswith('g:"')) and query.startswith('g:'):
+        query = query[:2] + '"' + query[2:]
+        if ' ' in query:
+            return query.replace(' ', '" ', 1)
         else:
-            return q + '"'
-    else:
-        q1 = search_m(q)
-        if q1 is None:
-            return ""
-        q2 = search_g_and_a(q1)
-        return q2
+            return query + '"'
+
+    (has, q_xml) = query_from_xml(query)
+    if has:
+        return q_xml
+
+    (has, q_m) = query_from_m(query)
+    if has:
+        return q_m
+
+    (has, q_ga) = query_from_g_and_a(query)
+    if has:
+        return q_ga
+
+    return query
 
 
 def fix_length(des):
@@ -53,34 +61,59 @@ def fix_length(des):
     return r_s + ':' + s1[1]
 
 
-def search_g_and_a(q):
+def query_from_xml(query):
+    g_start = query.find('groupId>')
+    g_end = query.find('</groupId>')
+    g_id = None
+    if g_start > -1 and g_end > -1:
+        g_id = query[g_start + len('groupId>'): g_end]
+
+    a_start = query.find('artifactId>')
+    a_end = query.find('</artifactId>')
+    a_id = None
+    if a_start > -1 and a_end > -1:
+        a_id = query[a_start + len('artifactId>'): a_end]
+
+    if g_id and a_id:
+        return True, g_id + ':' + a_id
+
+    if g_id:
+        return True, 'g:' + g_id
+    elif a_id:
+        return True, 'a:' + a_id
+
+    return False, None
+
+
+def query_from_g_and_a(query):
     """
     groupId 和 artifactId 同时作为查询条件
-    :param q: 查询表达式
+    :param query: 查询表达式
     :return: 查询表达式
     """
-    if q.startswith('g:') \
-            or q.startswith('a:') \
-            or q.startswith('m:') \
-            or q.startswith('tags:') \
-            or q.startswith('c:') \
-            or q.startswith('fc:') \
-            or q.startswith('1:') \
-            or (q.find(':') < 0):
-        return q
-    g_and_a = q.split(':', 1)
-    return 'g:"%s"+AND+a:"%s"' % (g_and_a[0], g_and_a[1])
+    if query.startswith('g:') \
+            or query.startswith('a:') \
+            or query.startswith('m:') \
+            or query.startswith('tags:') \
+            or query.startswith('c:') \
+            or query.startswith('fc:') \
+            or query.startswith('1:') \
+            or (query.find(':') < 0):
+        return False, query
+    g_and_a = query.split(':', 1)
+    return True, 'g:"%s"+AND+a:"%s"' % (g_and_a[0], g_and_a[1])
 
 
-def search_m(q):
+def query_from_m(query):
     """
     自定义的常用简短查询
-    :param q: 查询表达式
+    :param query: 查询表达式
     :return: 查询表达式
     """
-    if not q.startswith('m:'):
-        return q
-    q_map = {
+    if not query.startswith('m:'):
+        return False, query
+
+    q_mapping = {
         'poi': 'g:"org.apache.poi"',
         'jodd': 'g:"org.jodd"',
         'h2': 'g:"com.h2database"',
@@ -97,14 +130,16 @@ def search_m(q):
         'spring': 'g:"org.springframework"',
         'springboot': 'g:"org.springframework.boot"',
     }
-    q = q[2:]
-    if q in q_map:
-        return q_map[q]
+    query = query[2:]
+    if query in q_mapping:
+        return True, q_mapping[query]
+
+    return False, None
 
 
 def search_any():
     url = 'http://search.maven.org/solrsearch/select'
-    q = fix_q(wf.args[0].strip())
+    q = fix_query(wf.args[0].strip())
     if q is None or len(q) <= 0:
         return []
         # 不能使用 web.get 的参数形式 Maven 官方 API 仅仅只是对双引号做了 url 编码
