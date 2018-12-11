@@ -75,12 +75,12 @@ def query_from_xml(query):
         a_id = query[a_start + len('artifactId>'): a_end]
 
     if g_id and a_id:
-        return True, g_id + ':' + a_id
+        return True, 'g:"%s"+AND+a:"%s"' % (g_id, a_id)
 
     if g_id:
-        return True, 'g:' + g_id
+        return True, 'g:"%s"' % g_id
     elif a_id:
-        return True, 'a:' + a_id
+        return True, 'a"%s":' % a_id
 
     return False, None
 
