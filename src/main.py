@@ -81,7 +81,7 @@ def query_from_xml(query):
     if g_id:
         return True, 'g:"%s"' % g_id
     elif a_id:
-        return True, 'a"%s":' % a_id
+        return True, 'a:"%s"' % a_id
 
     return False, None
 
